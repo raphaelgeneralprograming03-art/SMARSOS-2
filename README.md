@@ -78,7 +78,7 @@
             padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             overflow-y: auto;
             z-index: 5;
             backdrop-filter: blur(10px);
@@ -228,7 +228,7 @@
 <body>
 
     <header>
-        <h1>ARMADURA NANOTECNOLÓGICA - MARK LXXXV COOP</h1>
+        <h1>ARMADURA NANOTECNOLÓGICA - INTEGRAL-1 (BLEEDING EDGE)</h1>
         <div class="sys-badges">
             <div class="badge">M.A.R.S.O.S.: <span id="st-marsos" style="color:#4ade80">ONLINE</span></div>
             <div class="badge">SROS: <span id="st-sros" style="color:#4ade80">SYNC</span></div>
@@ -299,10 +299,10 @@
 
         <main id="viewport">
             <div class="viewport-hud">
-                DIGITAL TWIN - ARMADURA MARK LXXXV<br>
+                DIGITAL TWIN - ARMADURA INTEGRAL-1<br>
                 ANGULO: <span id="hud-angulo">FRONTAL</span><br>
                 CAMADA: <span id="hud-camada">EXTERNA</span><br>
-                SISTEMA COOPERATIVO: TRIPLE-CORE ONLINE
+                SISTEMA COOPERATIVO: M.A.R.S.O.S. TRIPLE-CORE ONLINE
             </div>
         </main>
 
@@ -328,16 +328,24 @@
                     <label class="switch"><input type="checkbox" id="sw-mhd" checked onchange="toggleFuncao('mhd')"><span class="slider"></span></label>
                 </div>
                 <div class="func-toggle">
-                    <span>Depósito CO2/Carbono</span>
-                    <label class="switch"><input type="checkbox" id="sw-co2" checked><span class="slider"></span></label>
+                    <span>Câmara Reciclagem CO₂</span>
+                    <label class="switch"><input type="checkbox" id="sw-co2" checked onchange="toggleFuncao('co2')"><span class="slider"></span></label>
                 </div>
             </div>
 
             <div class="calc-box">
-                <label style="color:var(--gold-anodized); font-weight:bold;">03. OMBROS E BRAÇOS</label>
+                <label style="color:var(--gold-anodized); font-weight:bold;">03. BLINDAGEM E ARSENAL</label>
                 <div class="func-toggle">
                     <span>Placas S.A.M.S. Cinéticas</span>
-                    <label class="switch"><input type="checkbox" id="sw-sams" checked><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" id="sw-sams" checked onchange="toggleFuncao('sams')"><span class="slider"></span></label>
+                </div>
+                <div class="func-toggle">
+                    <span>Lança de Plasma MHD</span>
+                    <label class="switch"><input type="checkbox" id="sw-lance" onchange="toggleFuncao('lance')"><span class="slider"></span></label>
+                </div>
+                <div class="func-toggle">
+                    <span>Bisturi Molecular SROS</span>
+                    <label class="switch"><input type="checkbox" id="sw-scalpel" onchange="toggleFuncao('scalpel')"><span class="slider"></span></label>
                 </div>
             </div>
 
@@ -345,7 +353,7 @@
                 <label style="color:var(--gold-anodized); font-weight:bold;">04. MANOPLAS (MÃOS)</label>
                 <div class="func-toggle">
                     <span>Repulsor de Plasma</span>
-                    <label class="switch"><input type="checkbox" id="sw-plasma" checked><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" id="sw-plasma" checked onchange="toggleFuncao('plasma')"><span class="slider"></span></label>
                 </div>
             </div>
 
@@ -393,11 +401,13 @@
         pointLightCore.position.set(0, 0.7, 0.4);
         scene.add(pointLightCore);
 
+        // MATERIAIS
         const matRedMetallic = new THREE.MeshStandardMaterial({ color: 0x8b0000, metalness: 0.85, roughness: 0.25, name: 'externo' });
         const matGoldAnodized = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2, name: 'externo' });
         const matTitaniumSilver = new THREE.MeshStandardMaterial({ color: 0xa8b2c1, metalness: 0.95, roughness: 0.15, name: 'externo' });
         const matGlowCyan = new THREE.MeshBasicMaterial({ color: 0x00ffff });
         const matInternalGlow = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, name: 'interno' });
+        const matPlasmaBeam = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.8 });
 
         const armorGroup = new THREE.Group();
         const externalGroup = new THREE.Group();
@@ -409,7 +419,7 @@
         armorGroup.add(fxGroup);
         scene.add(armorGroup);
 
-        // Capacete
+        // 1. CAPACETE
         const helmetExt = new THREE.Mesh(new THREE.SphereGeometry(0.38, 32, 16), matRedMetallic);
         helmetExt.position.set(0, 1.8, 0);
         helmetExt.scale.set(0.9, 1.1, 1.0);
@@ -425,7 +435,7 @@
         eyes.position.set(0, 1.85, 0.33);
         externalGroup.add(eyes);
 
-        // Torso
+        // 2. TORSO & REATOR
         const chestExt = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.5, 1.1, 8), matRedMetallic);
         chestExt.position.set(0, 0.8, 0);
         externalGroup.add(chestExt);
@@ -438,7 +448,19 @@
         coreMesh.position.set(0, 0.9, 0.35);
         externalGroup.add(coreMesh);
 
-        // Membros
+        // Câmara de CO2 (Visualização no Torso)
+        const co2Chamber = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.03, 16, 32), new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true }));
+        co2Chamber.position.set(0, 0.9, 0.25);
+        externalGroup.add(co2Chamber);
+
+        // 3. ASAS RADIADORAS DORSAIS
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.8, 0.3), matTitaniumSilver);
+        wingL.position.set(-0.55, 1.1, -0.25); wingL.rotation.z = -0.3;
+        const wingR = wingL.clone(); wingR.position.x = 0.55; wingR.rotation.z = 0.3;
+        externalGroup.add(wingL, wingR);
+
+        // 4. MEMBROS SUPERIORES & ARSENAL
+        const samsPlates = [];
         [-0.85, 0.85].forEach((x) => {
             const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), matGoldAnodized);
             shoulder.position.set(x, 1.2, 0);
@@ -447,8 +469,36 @@
             const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.8), matRedMetallic);
             arm.position.set(x, 0.6, 0);
             externalGroup.add(arm);
+
+            // Placa Cinética SAMS
+            const samsPlate = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.4, 0.08), new THREE.MeshStandardMaterial({ color: 0x00f0ff, metalness: 0.9, roughness: 0.1 }));
+            samsPlate.position.set(x * 1.15, 0.7, 0.1);
+            externalGroup.add(samsPlate);
+            samsPlates.push(samsPlate);
         });
 
+        // Repulsores das Mãos
+        const repulsorL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), matGlowCyan);
+        repulsorL.position.set(-0.85, 0.15, 0);
+        const repulsorR = repulsorL.clone(); repulsorR.position.x = 0.85;
+        externalGroup.add(repulsorL, repulsorR);
+
+        // Lança de Plasma (Mão Direita)
+        const lanceMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.12, 1.5), matPlasmaBeam);
+        lanceMesh.position.set(0.85, 0.15, 0.8);
+        lanceMesh.rotation.x = Math.PI / 2;
+        lanceMesh.visible = false;
+        fxGroup.add(lanceMesh);
+
+        // Bisturi Molecular SROS (Mão Esquerda)
+        const scalpelMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.04, 1.2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        scalpelMesh.position.set(-0.85, 0.15, 0.6);
+        scalpelMesh.rotation.x = Math.PI / 2;
+        scalpelMesh.visible = false;
+        fxGroup.add(scalpelMesh);
+
+        // 5. MEMBROS INFERIORES & PROPULSÃO
+        const bootJets = [];
         [-0.32, 0.32].forEach(x => {
             const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.15, 0.9), matRedMetallic);
             thigh.position.set(x, -0.5, 0);
@@ -457,22 +507,26 @@
             const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.9), matTitaniumSilver);
             calf.position.set(x, -1.45, 0);
             externalGroup.add(calf);
+
+            const bootJet = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.5, 16), matPlasmaBeam);
+            bootJet.position.set(x, -2.1, 0);
+            bootJet.rotation.x = Math.PI;
+            fxGroup.add(bootJet);
+            bootJets.push(bootJet);
         });
 
-        // Estrutura Interna
+        // 6. ESTRUTURA INTERNA & ESCUDO MHD
         const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.5), matInternalGlow);
         spine.position.set(0, 0.2, -0.1);
         internalGroup.add(spine);
 
-        // Escudo MHD
         const shieldMesh = new THREE.Mesh(
             new THREE.SphereGeometry(2.4, 32, 16),
             new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.15, wireframe: true })
         );
-        shieldMesh.visible = true;
         fxGroup.add(shieldMesh);
 
-        // Funções de Câmera e Visão
+        // CÂMERAS E VISÃO
         function setCameraView(vista) {
             document.getElementById('hud-angulo').innerText = vista;
             const targetPos = new THREE.Vector3();
@@ -521,17 +575,17 @@
             });
         }
 
-        // Execução dos Algoritmos de Calculadora
+        // CALCULADORAS E ATUALIZAÇÃO DO MODELO
         function executarCalculos() {
             const gw = parseFloat(document.getElementById('input-mhd').value);
             const co2 = parseFloat(document.getElementById('input-co2').value);
             const impacto = parseFloat(document.getElementById('input-impacto').value);
 
-            // Algoritmo 2 (MHD)
+            // Ajuste dinâmico do Escudo MHD com base no slider
+            shieldMesh.scale.setScalar(1 + (gw * 0.15));
+
             document.getElementById('out-escudo').innerText = `${(gw * 100).toFixed(1)} Tesla`;
             document.getElementById('out-empuxo').innerText = `${(gw * 70).toFixed(1)} kN`;
-
-            // Algoritmo 3 (CO2 e SAMS)
             document.getElementById('out-reparo').innerText = `${(co2 * 6).toFixed(1)} mm²/s`;
             
             let absorcao = 99.5 - (impacto * 0.02);
@@ -542,22 +596,40 @@
             document.getElementById('out-ossos').innerText = `${estresse} MPa (${estresse > 0 ? 'ATENÇÃO' : 'Seguro'})`;
         }
 
+        // CONTROLADOR DE FUNÇÕES 3D
         function toggleFuncao(func) {
             if (func === 'hud') {
-                eyes.material.color.setHex(document.getElementById('sw-hud').checked ? 0x00ffff : 0x222222);
+                eyes.material.color.setHex(document.getElementById('sw-hud').checked ? 0x00ffff : 0x111111);
             } else if (func === 'lcd') {
                 facePlate.material.color.setHex(document.getElementById('sw-lcd').checked ? 0x111111 : 0xd4af37);
             } else if (func === 'mhd') {
                 shieldMesh.visible = document.getElementById('sw-mhd').checked;
+            } else if (func === 'co2') {
+                co2Chamber.visible = document.getElementById('sw-co2').checked;
+            } else if (func === 'sams') {
+                samsPlates.forEach(p => p.visible = document.getElementById('sw-sams').checked);
+            } else if (func === 'lance') {
+                lanceMesh.visible = document.getElementById('sw-lance').checked;
+            } else if (func === 'scalpel') {
+                scalpelMesh.visible = document.getElementById('sw-scalpel').checked;
+            } else if (func === 'plasma') {
+                repulsorL.visible = document.getElementById('sw-plasma').checked;
+                repulsorR.visible = document.getElementById('sw-plasma').checked;
             } else if (func === 'prop') {
+                bootJets.forEach(j => j.visible = document.getElementById('sw-prop').checked);
                 pointLightCore.intensity = document.getElementById('sw-prop').checked ? 2.0 : 0.2;
             }
         }
 
+        // LOOP DE ANIMAÇÃO 60 FPS
         function animate() {
             requestAnimationFrame(animate);
             coreMesh.rotation.z += 0.02;
             if (shieldMesh.visible) shieldMesh.rotation.y += 0.005;
+            
+            // Animação de rotação contínua da armadura
+            armorGroup.rotation.y += 0.003;
+
             controls.update();
             renderer.render(scene, camera);
         }
